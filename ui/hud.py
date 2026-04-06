@@ -20,6 +20,10 @@ try:
 except ImportError:
     PYQT_AVAILABLE = False
     print("⚠️  PyQt6 not installed. HUD features will be limited.")
+    
+    # Dummy QObject for when PyQt6 is not available
+    class QObject:
+        pass
 
 
 @dataclass

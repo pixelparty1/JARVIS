@@ -198,14 +198,40 @@ def main():
     # Check command line arguments
     text_only = "--text-only" in sys.argv or "--no-voice" in sys.argv
     debug = "--debug" in sys.argv or "-d" in sys.argv
+    gui_mode = "--gui" in sys.argv or "--desktop" in sys.argv or len(sys.argv) == 1
     
-    try:
-        jarvis = JARVIS(text_only=text_only, debug=debug)
-        jarvis.run()
-    except Exception as e:
-        logger.critical(f"Critical error: {e}")
-        print(f"❌ Critical error: {e}")
-        sys.exit(1)
+    # If GUI flag is present or no arguments (default), launch GUI
+    if gui_mode:
+        try:
+            from PyQt5.QtWidgets import QApplication
+            from ui.main_window import JarvisMainWindow
+            
+            logger.info("Launching JARVIS Desktop Application...")
+            app = QApplication(sys.argv)
+            window = JarvisMainWindow()
+            window.show()
+            sys.exit(app.exec_())
+            
+        except ImportError:
+            logger.warning("PyQt5 not installed, falling back to CLI mode")
+            print("⚠️ PyQt5 not found. Install with: pip install PyQt5")
+            print("Falling back to CLI mode...\n")
+            text_only = True
+        except Exception as e:
+            logger.error(f"GUI Error: {e}. Falling back to CLI mode")
+            print(f"GUI Error: {e}")
+            print("Falling back to CLI mode...\n")
+            text_only = True
+    
+    # CLI mode
+    if not gui_mode or text_only:
+        try:
+            jarvis = JARVIS(text_only=text_only, debug=debug)
+            jarvis.run()
+        except Exception as e:
+            logger.critical(f"Critical error: {e}")
+            print(f"❌ Critical error: {e}")
+            sys.exit(1)
 
 
 if __name__ == "__main__":
