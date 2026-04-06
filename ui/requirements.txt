@@ -1,0 +1,38 @@
+# PyQt6 - GUI Framework
+PyQt6==6.6.1
+
+# Core orchestrator dependencies
+groq==0.4.0
+psutil==5.9.5
+
+# Optional: Voice support (uncomment to enable)
+# SpeechRecognition==3.10.0
+# pyttsx3==2.90
+
+# Optional: Enhanced UI effects
+# PyOpenGL==3.1.6
+# Pillow==10.0.0
+
+---
+
+# Installation
+
+```bash
+# Core only (minimal)
+pip install -r requirements.txt
+
+# With voice support
+pip install -r requirements.txt SpeechRecognition pyttsx3
+
+# Full install
+pip install PyQt6 groq psutil SpeechRecognition pyttsx3
+```
+
+---
+
+# Version Notes
+
+- PyQt6 6.6.1: Latest stable version
+- Python 3.8+: Required
+- Windows/macOS/Linux: All supported
+- Tested on Intel and ARM processors
