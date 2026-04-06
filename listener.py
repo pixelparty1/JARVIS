@@ -21,19 +21,31 @@ class VoiceListener:
         with self.microphone as source:
             self.recognizer.adjust_for_ambient_noise(source, duration=1)
     
-    def listen_for_wake_word(self) -> bool:
+    def listen_for_wake_word(self, timeout: Optional[int] = None, phrase_time_limit: Optional[int] = None) -> bool:
         """
         Listen continuously for wake word
-        Returns True when wake word is detected
+        
+        Args:
+            timeout: Time to wait for voice input (seconds). Defaults to SPEECH_RECOGNITION_TIMEOUT
+            phrase_time_limit: Maximum phrase duration (seconds). Defaults to SPEECH_RECOGNITION_PHRASE_TIME_LIMIT
+            
+        Returns:
+            True when wake word is detected, False otherwise
         """
+        # Use config defaults if not provided
+        if timeout is None:
+            timeout = SPEECH_RECOGNITION_TIMEOUT
+        if phrase_time_limit is None:
+            phrase_time_limit = SPEECH_RECOGNITION_PHRASE_TIME_LIMIT
+        
         print(f"🎤 Listening for wake word: '{self.wake_word}'...")
         
         try:
             with self.microphone as source:
                 audio = self.recognizer.listen(
                     source,
-                    timeout=SPEECH_RECOGNITION_TIMEOUT,
-                    phrase_time_limit=SPEECH_RECOGNITION_PHRASE_TIME_LIMIT
+                    timeout=timeout,
+                    phrase_time_limit=phrase_time_limit
                 )
             
             text = self.recognizer.recognize_google(audio).lower()
@@ -45,6 +57,9 @@ class VoiceListener:
             
             return False
             
+        except sr.WaitTimeoutError:
+            print("⏱️ Wake word listening timeout")
+            return False
         except sr.UnknownValueError:
             print("❌ Could not understand audio")
             return False
@@ -55,25 +70,40 @@ class VoiceListener:
             print(f"❌ Error: {e}")
             return False
     
-    def listen_for_command(self) -> Optional[str]:
+    def listen_for_command(self, timeout: Optional[int] = None, phrase_time_limit: Optional[int] = None) -> Optional[str]:
         """
         Listen for user command after wake word detected
-        Returns the recognized text or None
+        
+        Args:
+            timeout: Time to wait for voice input (seconds). Defaults to SPEECH_RECOGNITION_TIMEOUT
+            phrase_time_limit: Maximum phrase duration (seconds). Defaults to SPEECH_RECOGNITION_PHRASE_TIME_LIMIT
+            
+        Returns:
+            Recognized text or None if no speech or error
         """
+        # Use config defaults if not provided
+        if timeout is None:
+            timeout = SPEECH_RECOGNITION_TIMEOUT
+        if phrase_time_limit is None:
+            phrase_time_limit = SPEECH_RECOGNITION_PHRASE_TIME_LIMIT
+        
         print("🎤 Listening for command...")
         
         try:
             with self.microphone as source:
                 audio = self.recognizer.listen(
                     source,
-                    timeout=SPEECH_RECOGNITION_TIMEOUT,
-                    phrase_time_limit=SPEECH_RECOGNITION_PHRASE_TIME_LIMIT
+                    timeout=timeout,
+                    phrase_time_limit=phrase_time_limit
                 )
             
             text = self.recognizer.recognize_google(audio)
             print(f"✅ Command received: {text}")
             return text
             
+        except sr.WaitTimeoutError:
+            print("⏱️ Listening timeout reached")
+            return None
         except sr.UnknownValueError:
             print("❌ Could not understand command")
             return None

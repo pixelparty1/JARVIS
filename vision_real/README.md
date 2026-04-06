@@ -209,7 +209,7 @@ Create `jarvis_config/vision_config.json`:
   },
   "scene_analysis": {
     "enable_groq": true,
-    "groq_model": "mixtral-8x7b-32768"
+    "groq_model": "openai/gpt-oss-120b"
   },
   "privacy": {
     "store_faces": false,

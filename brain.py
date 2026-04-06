@@ -74,60 +74,47 @@ class JarvisBrain:
     
     def parse_intent(self, user_input: str) -> Dict:
         """
-        Convert natural language to structured intent
+        Convert natural language to structured intent (simplified, no JSON parsing)
         
         Args:
             user_input: User's natural language input
             
         Returns:
-            JSON intent structure
+            Simple intent structure
         """
-        intent_prompt = f"""Analyze this user request and convert it to a structured intent JSON.
-
-User request: "{user_input}"
-
-Return ONLY a valid JSON object with these fields:
-- "intent": primary action (e.g., "open_app", "get_weather", "add_note", "control_volume", "search_web", "set_timer", "read_note")
-- "parameters": dict with specific details needed for the action
-- "confidence": 0-1 how confident you are about this interpretation
-- "requires_confirmation": boolean if action needs user confirmation
-
-Examples:
-{{"intent": "open_app", "parameters": {{"app_name": "chrome"}}, "confidence": 0.95, "requires_confirmation": false}}
-{{"intent": "control_volume", "parameters": {{"action": "increase", "amount": 10}}, "confidence": 0.9, "requires_confirmation": false}}
-{{"intent": "search_web", "parameters": {{"query": "python programming"}}, "confidence": 0.85, "requires_confirmation": false}}
-
-Return ONLY the JSON, no other text."""
+        command_lower = user_input.lower()
         
-        messages = [
-            {"role": "system", "content": "You are a JSON intent parser. Return ONLY valid JSON, nothing else."},
-            {"role": "user", "content": intent_prompt}
-        ]
+        # Simple rule-based intent parsing (no Groq call)
+        if any(word in command_lower for word in ['open', 'launch', 'start']):
+            app_name = ''
+            for app in ['chrome', 'spotify', 'vs code', 'brave', 'calculator', 'camera', 'calendar', 'clock']:
+                if app in command_lower:
+                    app_name = app
+                    break
+            if app_name:
+                return {
+                    "intent": "open_app",
+                    "parameters": {"app_name": app_name},
+                    "confidence": 0.95,
+                    "requires_confirmation": False
+                }
         
-        completion = self.client.chat.completions.create(
-            model=GROQ_MODEL,
-            messages=messages,
-            temperature=0.3,  # Lower temperature for structured output
-            max_completion_tokens=500,
-            top_p=1.0,
-            stream=False
-        )
+        if 'search' in command_lower or 'google' in command_lower:
+            query = command_lower.replace('search', '').replace('google', '').strip()
+            return {
+                "intent": "search_web",
+                "parameters": {"query": query},
+                "confidence": 0.9,
+                "requires_confirmation": False
+            }
         
-        response_text = completion.choices[0].message.content.strip()
-        
-        try:
-            # Extract JSON from response (in case there's extra text)
-            start_idx = response_text.find('{')
-            end_idx = response_text.rfind('}') + 1
-            
-            if start_idx != -1 and end_idx > start_idx:
-                json_str = response_text[start_idx:end_idx]
-                intent = json.loads(json_str)
-                return intent
-        except json.JSONDecodeError:
-            pass
-        
-        # Fallback intent
+        # Default to conversation
+        return {
+            "intent": "conversation",
+            "parameters": {"message": user_input},
+            "confidence": 0.8,
+            "requires_confirmation": False
+        }
         return {
             "intent": "unknown",
             "parameters": {"original_input": user_input},

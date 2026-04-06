@@ -187,7 +187,7 @@ Create `jarvis_config/vision_config.json`:
     "debounce_frames": 5
   },
   "scene_analysis": {
-    "groq_model": "mixtral-8x7b-32768",
+    "groq_model": "openai/gpt-oss-120b",
     "enable_predictions": true
   },
   "privacy": {

@@ -7,16 +7,16 @@ import os
 import subprocess
 import platform
 import psutil
+import threading
 from typing import Dict, Any
 from config import COMMON_APP_PATHS
 
 class SystemController:
     """System control and OS interactions"""
     
-    @staticmethod
-    def open_app(app_name: str) -> str:
+    def open_app(self, app_name: str) -> str:
         """
-        Open an application
+        Open an application with multiple app support
         
         Args:
             app_name: Name of application to open
@@ -24,11 +24,14 @@ class SystemController:
         Returns:
             Status message
         """
-        app_name = app_name.lower().strip()
+        app_name_lower = app_name.lower().strip()
+        
+        # Clean app names
+        app_name_lower = app_name_lower.replace('vs code', 'code').replace('visual studio code', 'code')
         
         # Check if app is in common paths
-        if app_name in COMMON_APP_PATHS:
-            paths = COMMON_APP_PATHS[app_name]
+        if app_name_lower in COMMON_APP_PATHS:
+            paths = COMMON_APP_PATHS[app_name_lower]
             for path in paths:
                 # Replace {user} with actual username
                 path = path.replace("{user}", os.getlogin())
@@ -39,8 +42,69 @@ class SystemController:
                         return f"✅ Opening {app_name}"
                     except Exception as e:
                         return f"❌ Failed to open {app_name}: {str(e)}"
-            
-            return f"❌ {app_name} not found at expected locations"
+        
+        # Direct app routing
+        if app_name_lower == 'chrome':
+            try:
+                subprocess.Popen('chrome')
+                return "✅ Opening Chrome"
+            except:
+                return self._open_chrome()
+        
+        elif app_name_lower == 'spotify':
+            try:
+                subprocess.Popen('spotify')
+                return "✅ Opening Spotify"
+            except Exception as e:
+                return f"❌ Spotify error: {str(e)}"
+        
+        elif app_name_lower == 'code' or app_name_lower == 'vs code':
+            try:
+                subprocess.Popen('code')
+                return "✅ Opening VS Code"
+            except Exception as e:
+                return f"❌ VS Code error: {str(e)}"
+        
+        elif app_name_lower == 'brave':
+            try:
+                subprocess.Popen('brave')
+                return "✅ Opening Brave"
+            except Exception as e:
+                return f"❌ Brave error: {str(e)}"
+        
+        elif app_name_lower == 'calculator':
+            try:
+                if platform.system() == "Windows":
+                    subprocess.Popen('calc')
+                else:
+                    subprocess.Popen('calculator')
+                return "✅ Opening Calculator"
+            except Exception as e:
+                return f"❌ Calculator error: {str(e)}"
+        
+        elif app_name_lower == 'camera':
+            try:
+                return self._open_camera()
+            except Exception as e:
+                return f"❌ Camera error: {str(e)}"
+        
+        elif app_name_lower == 'calendar':
+            try:
+                import webbrowser
+                webbrowser.open("https://calendar.google.com")
+                return "✅ Opening Google Calendar"
+            except Exception as e:
+                return f"❌ Calendar error: {str(e)}"
+        
+        elif app_name_lower == 'clock':
+            try:
+                if platform.system() == "Windows":
+                    subprocess.Popen('clock')
+                else:
+                    subprocess.Popen('clock')
+                return "✅ Opening Clock"
+            except Exception as e:
+                return f"❌ Clock error: {str(e)}"
         
         # Fallback: try to open with system default
         try:
@@ -51,6 +115,42 @@ class SystemController:
             return f"✅ Opening {app_name}"
         except Exception as e:
             return f"❌ Failed to open {app_name}: {str(e)}"
+    
+    def _open_chrome(self) -> str:
+        """Open Chrome"""
+        try:
+            import webbrowser
+            webbrowser.open("https://www.google.com")
+            return "✅ Opening Google Chrome"
+        except Exception as e:
+            return f"❌ Chrome error: {str(e)}"
+    
+    def _open_camera(self) -> str:
+        """Open camera"""
+        try:
+            import cv2
+            cap = cv2.VideoCapture(0)
+            if not cap.isOpened():
+                return "❌ Camera not available"
+            
+            def camera_thread():
+                while True:
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+                    cv2.imshow("JARVIS Camera", frame)
+                    if cv2.waitKey(1) & 0xFF == 27:  # ESC to close
+                        break
+                cap.release()
+                cv2.destroyAllWindows()
+            
+            thread = threading.Thread(target=camera_thread, daemon=True)
+            thread.start()
+            return "✅ Opening camera (press ESC to close)"
+        except ImportError:
+            return "❌ OpenCV not installed: pip install opencv-python"
+        except Exception as e:
+            return f"❌ Camera error: {str(e)}"
     
     @staticmethod
     def close_app(app_name: str) -> str:

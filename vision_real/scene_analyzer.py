@@ -152,7 +152,7 @@ Be specific and helpful. Consider:
         """Use Groq to analyze scene."""
         try:
             response = self.client.messages.create(
-                model="mixtral-8x7b-32768",
+                model="openai/gpt-oss-120b",
                 messages=[
                     {"role": "user", "content": prompt}
                 ],
@@ -259,7 +259,7 @@ Provide a short, specific, helpful suggestion (1-2 sentences) that JARVIS should
         
         try:
             response = self.client.messages.create(
-                model="mixtral-8x7b-32768",
+                model="openai/gpt-oss-120b",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.7,
                 max_tokens=200

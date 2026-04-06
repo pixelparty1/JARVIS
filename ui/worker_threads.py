@@ -45,7 +45,7 @@ class JarvisWorkerThread(QThread):
             
             # Check for system commands first
             if any(cmd in self.user_input.lower() for cmd in ['time', 'date', 'open', 'close', 'execute']):
-                result = self.command_router.route(self.user_input)
+                result = self.command_router.route_command(self.user_input)
                 if result and result != "Command not recognized":
                     self.response_ready.emit(result)
                     return

@@ -110,7 +110,7 @@ Edit `.env` to customize:
 WAKE_WORD=wake up
 
 # Groq model
-GROQ_MODEL=mixtral-8x7b-32768
+GROQ_MODEL=openai/gpt-oss-120b
 
 # Features
 ENABLE_VOICE=true

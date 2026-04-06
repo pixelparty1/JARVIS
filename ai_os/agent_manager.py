@@ -342,7 +342,7 @@ class ResearchAgent(BaseAgent):
         if self.groq:
             try:
                 message = self.groq.messages.create(
-                    model="mixtral-8x7b-32768",
+                    model="openai/gpt-oss-120b",
                     messages=[
                         {"role": "user", "content": f"Research: {topic}. Provide key insights in 3-4 sentences."}
                     ],
@@ -396,7 +396,7 @@ class CodingAgent(BaseAgent):
         if self.groq:
             try:
                 message = self.groq.messages.create(
-                    model="mixtral-8x7b-32768",
+                    model="openai/gpt-oss-120b",
                     messages=[
                         {"role": "user", "content": f"Write {language} code for: {requirement}"}
                     ],
@@ -521,7 +521,7 @@ class PersonalAssistantAgent(BaseAgent):
         if self.groq:
             try:
                 message = self.groq.messages.create(
-                    model="mixtral-8x7b-32768",
+                    model="openai/gpt-oss-120b",
                     messages=[
                         {"role": "user", "content": f"{task.description}"}
                     ],
